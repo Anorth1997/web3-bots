@@ -1,0 +1,9 @@
+inscription-mint-bot/node_modules/
+
+# IntelliJ IDEA files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+dist/*
