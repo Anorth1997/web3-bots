@@ -15,12 +15,14 @@ const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
  * @param toAddress TX to Address
  * @param data hex data with the TX
  * @param weiToSend amount of wei along with TX
+ * @param nonce
  */
-async function sendTransaction(toAddress: string, data: string, weiToSend: number): Promise<void> {
+async function sendTransaction(toAddress: string, data: string, weiToSend: number, nonce: number): Promise<void> {
   const tx = {
     to: toAddress,
     value: weiToSend,
     data: data,
+    nonce: nonce,
   };
 
   try {
@@ -46,14 +48,16 @@ async function main() {
   // customize the data along with transaction
   const data = '0x646174613a2c7b2270223a226173632d3230222c226f70223a226d696e74222c227469636b223a226176616c222c22616d74223a22313030303030303030227d';
 
+  let nonce = await wallet.getNonce();
   // customize the number of transaction you want to send
-  const numberOfTransactions = 2;
+  const numberOfTransactions = 1000;
   // For public rpc node, the rate limit for sending transaction is pretty high, so set the waitTimeInMilliseconds to avoid
-  const waitTimeInMilliseconds = 5000;
+  const waitTimeInMilliseconds = 100;
   for (let i = 0; i < numberOfTransactions; i++) {
-    console.log(`sending transaction ${i}`);
-    await sendTransaction(toAddress, data, weiToSend);
+    console.log(`sending transaction ${i}, nonce: ${nonce}`);
+    await sendTransaction(toAddress, data, weiToSend, nonce);
     await sleep(waitTimeInMilliseconds)
+    nonce += 1
   }
   console.log('task finish');
 }
