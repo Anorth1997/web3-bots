@@ -1,13 +1,9 @@
-import path from "path";
-
-const dotenv = require('dotenv');
-const env = dotenv.config({ path: path.resolve(__dirname, '.env') });
-
 import { ethers } from 'ethers';
+import { config } from "./config";
 
 // Connect to the blockchain network, you can set your onw rpc provider node url, or use the default one
-const provider = new ethers.JsonRpcProvider(process.env.PROVIDER_URL || 'https://api.avax.network/ext/bc/C/rpc');
-const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+const provider = new ethers.JsonRpcProvider(config.rpcProviderUrl || 'https://bsc.publicnode.com');
+const wallet = new ethers.Wallet(config.privateKey, provider);
 
 // Function to send a transaction
 /**
@@ -18,11 +14,15 @@ const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
  * @param nonce
  */
 async function sendTransaction(toAddress: string, data: string, weiToSend: number, nonce: number): Promise<void> {
+  const gasPrice = (await provider.getFeeData()).gasPrice;
+
   const tx = {
     to: toAddress,
     value: weiToSend,
     data: data,
     nonce: nonce,
+    gasPrice: gasPrice,
+    maxPriorityFeePerGas: 0,
   };
 
   try {
@@ -39,20 +39,45 @@ async function sleep(duration: number): Promise<void> {
   });
 }
 
+/**
+ * validate if all the configurations are set properly
+ * 脚本配置校验
+ */
+function validate() {
+  if (!config.mintCount) {
+    throw new Error("Please set mintCount in config.ts")
+  }
+
+  if (!config.inputData) {
+    throw new Error("Please set inputData in config.ts")
+  }
+
+  if (!config.rpcProviderUrl) {
+    throw new Error("Please set rpcProviderUrl in config.ts")
+  }
+
+  if (!config.privateKey) {
+    throw new Error("Please set privateKey in config.ts")
+  }
+}
+
 // Example usage
 async function main() {
-  // customize the transaction toAddress, for inscription mint, this should be the same as your from address
-  const toAddress = process.env.TO_ADDRESS!;
+  validate();
+  // customize the transaction toAddress
+  const toAddress = await wallet.getAddress();
   // customize the amount of wei
   const weiToSend = 0;
   // customize the data along with transaction
-  const data = '0x646174613a2c7b2270223a226173632d3230222c226f70223a226d696e74222c227469636b223a226176616c222c22616d74223a22313030303030303030227d';
+  const data = config.inputData;
 
   let nonce = await wallet.getNonce();
   // customize the number of transaction you want to send
-  const numberOfTransactions = 1000;
+  const numberOfTransactions = config.mintCount;
+
   // For public rpc node, the rate limit for sending transaction is pretty high, so set the waitTimeInMilliseconds to avoid
   const waitTimeInMilliseconds = 100;
+  // await sendTransaction(toAddress, data, weiToSend, nonce);
   for (let i = 0; i < numberOfTransactions; i++) {
     console.log(`sending transaction ${i}, nonce: ${nonce}`);
     await sendTransaction(toAddress, data, weiToSend, nonce);

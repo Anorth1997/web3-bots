@@ -20,16 +20,8 @@ cd web3-bots/inscription-mint-bot
 npm install
 ```
 
-3. Set Up Environment Variables
-- Create a .env file in the inscription-mint-bot folder
-- Add the following variables:
-```
-PROVIDER_URL=Your_Ethereum_Provider_URL
-PRIVATE_KEY=Your_Ethereum_Wallet_Private_Key
-TO_ADDRESS=Recipient_Address
-```
-
-- Replace `Your_Ethereum_Provider_URL`, `Your_Ethereum_Wallet_Private_Key`, and `Recipient_Address` with your actual Ethereum provider URL, private key, and the recipient's address.
+3. Set Up Bot Configurations
+- Edit the configurations in file config.ts
 
 4. Install ts-node
 ```bash
@@ -37,11 +29,7 @@ npm install -g ts-node
 ```
 
 ### Usage
-1. Customize the Transaction
-
-- Open app.ts.
-- Modify the `data`, `weiToSend`, `numberOfTransactions`, and `waitTimeInMilliseconds` variables as needed.
-2. Run the Bot
+1. Run the Bot
 
 ```bash
 ts-node app.ts
