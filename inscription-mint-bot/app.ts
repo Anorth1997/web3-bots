@@ -14,14 +14,16 @@ const wallet = new ethers.Wallet(config.privateKey, provider);
  * @param nonce
  */
 async function sendTransaction(toAddress: string, data: string, weiToSend: number, nonce: number): Promise<void> {
-  const gasPrice = (await provider.getFeeData()).gasPrice;
+  const feeData = (await provider.getFeeData());
+  const multiplier: bigint = 120n // 1.2
+  const maxFeePerGas = feeData.gasPrice! * multiplier / 100n
 
   const tx = {
     to: toAddress,
     value: weiToSend,
     data: data,
     nonce: nonce,
-    gasPrice: gasPrice,
+    maxFeePerGas: maxFeePerGas,
     maxPriorityFeePerGas: 0,
   };
 
